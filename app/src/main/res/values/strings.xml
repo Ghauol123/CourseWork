@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">CourseWork</string>
+
+    <string-array name="yoga_types">
+        <item>Hatha Yoga</item>
+        <item>Vinyasa Yoga</item>
+        <item>Ashtanga Yoga</item>
+        <item>Yin Yoga</item>
+        <item>Restorative Yoga</item>
+    </string-array>
+</resources>
