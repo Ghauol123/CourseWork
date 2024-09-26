@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/textViewDateLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Date (DD/MM/YYYY) *"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/button_pick_day"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Choose date"
+        app:layout_constraintTop_toBottomOf="@id/textViewDateLabel" />
+
+    <TextView
+        android:id="@+id/textViewTeacherLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Teacher *"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_pick_day" />
+
+    <EditText
+        android:id="@+id/editTextTeacher"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:hint="Enter teacher's name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textViewTeacherLabel" />
+
+    <TextView
+        android:id="@+id/textViewCommentsLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Additional Comments"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/editTextTeacher" />
+
+    <EditText
+        android:id="@+id/editTextComments"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:hint="Enter additional comments"
+        android:minLines="3"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textViewCommentsLabel" />
+
+    <Button
+        android:id="@+id/buttonUpdateClass"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Update Class"
+        android:layout_marginTop="24dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/editTextComments" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -25,7 +25,7 @@
         <activity android:name=".EditCourseActivity"></activity>
         <activity android:name=".CreateCourseActivity"></activity>
         <activity android:name=".ClassActivity"></activity>
-
+        <activity android:name=".EditClassActivity" />
     </application>
 
 </manifest>

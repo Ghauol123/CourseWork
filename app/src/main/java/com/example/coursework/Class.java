@@ -26,4 +26,7 @@ public class Class implements Serializable {
         this.teacher = teacher;
         this.comments = comments;
     }
+    public int GetId() {
+        return id;
+    }
 }

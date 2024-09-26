@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class ClassActivity extends AppCompatActivity {
+public class ClassActivity extends AppCompatActivity implements ClassAdapter.OnClassClickListener, ClassAdapter.OnClassDeleteListener {
     private TextView textViewCourseInfo;
     private Button buttonAddClass;
     private RecyclerView recyclerViewClasses;
@@ -46,14 +46,10 @@ public class ClassActivity extends AppCompatActivity {
             updateCourseInfo();
             loadClassesForCourse(course.getId());
         }
-        buttonAddClass = findViewById(R.id.buttonAddClass);
-        buttonAddClass.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(ClassActivity.this, CreateClassActivity.class);
-                intent.putExtra("course_id", course.getId()); // Truyền courseId vào Intent
-                startActivity(intent);  // Start the CreateClassActivity
-            }
+        buttonAddClass.setOnClickListener(v -> {
+            Intent intent = new Intent(ClassActivity.this, CreateClassActivity.class);
+            intent.putExtra("course_id", course.getId());
+            startActivity(intent);
         });
         recyclerViewClasses.setLayoutManager(new LinearLayoutManager(this));
         
@@ -69,26 +65,53 @@ public class ClassActivity extends AppCompatActivity {
         textViewCourseInfo.setText(courseInfo);
     }
     private void loadClassesForCourse(int courseId) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                List<Class> classList = db.classDao().getClassesForCourse(courseId);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (classList != null && !classList.isEmpty()) {
-                            setupRecyclerView(classList);
-                        } else {
-                            Toast.makeText(ClassActivity.this, "Không có lớp học nào", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-            }
+        new Thread(() -> {
+            List<Class> classList = db.classDao().getClassesForCourse(courseId);
+            runOnUiThread(() -> {
+                if (classList != null && !classList.isEmpty()) {
+                    setupRecyclerView(classList);
+                } else {
+                    Toast.makeText(ClassActivity.this, "Không có lớp học nào", Toast.LENGTH_SHORT).show();
+                }
+            });
         }).start();
 
     }
     private void setupRecyclerView(List<Class> classList) {
-        ClassAdapter classAdapter = new ClassAdapter(classList);
+        ClassAdapter classAdapter = new ClassAdapter(classList, this, this);
         recyclerViewClasses.setAdapter(classAdapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadClassesForCourse(course.getId());
+    }
+
+    @Override
+    public void onClassClick(Class classItem) {
+        Intent intent = new Intent(ClassActivity.this, EditClassActivity.class);
+        intent.putExtra("class_id", classItem.id);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onClassDelete(Class classItem) {
+        new AlertDialog.Builder(this)
+                .setTitle("Xác nhận xóa")
+                .setMessage("Bạn có chắc chắn muốn xóa lớp học này?")
+                .setPositiveButton("Xóa", (dialog, which) -> deleteClass(classItem))
+                .setNegativeButton("Hủy", null)
+                .show();
+    }
+
+    private void deleteClass(Class classItem) {
+        new Thread(() -> {
+            db.classDao().delete(classItem);
+            runOnUiThread(() -> {
+                Toast.makeText(ClassActivity.this, "Đã xóa lớp học", Toast.LENGTH_SHORT).show();
+                loadClassesForCourse(course.getId());
+            });
+        }).start();
     }
 }
