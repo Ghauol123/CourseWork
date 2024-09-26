@@ -2,10 +2,15 @@
     <string name="app_name">CourseWork</string>
 
     <string-array name="yoga_types">
+        <item>All</item>
         <item>Hatha Yoga</item>
         <item>Vinyasa Yoga</item>
         <item>Ashtanga Yoga</item>
         <item>Yin Yoga</item>
         <item>Restorative Yoga</item>
+        <!-- Add more types as needed -->
     </string-array>
+
+    <!-- Gợi ý cho Spinner -->
+    <string name="select_yoga_type">Select Yoga Type</string>
 </resources>

@@ -13,26 +13,24 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
-public class CreateClassActivity extends AppCompatActivity {
+public class EditClassActivity extends AppCompatActivity {
 
-    private long courseId;
-
+    private int classId;
     private Button editTextDate;
     private EditText editTextTeacher;
     private EditText editTextComments;
-    private Button buttonCreateClass;
+    private Button buttonUpdateClass;
     Calendar selectedDate = Calendar.getInstance();
+    private AppDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_class);
+        setContentView(R.layout.activity_edit_class);
 
         // Thiết lập Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -40,31 +38,35 @@ public class CreateClassActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
 
-        // Initialize views
+        db = AppDatabase.getDatabase(this);
+        classId = getIntent().getIntExtra("class_id", -1);
+
         editTextDate = findViewById(R.id.button_pick_day);
         editTextTeacher = findViewById(R.id.editTextTeacher);
         editTextComments = findViewById(R.id.editTextComments);
-        buttonCreateClass = findViewById(R.id.buttonCreateClass);
-        editTextDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDatePicker();
-            }
-        });
-        buttonCreateClass.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (validateInputs()) {
-                    saveCourse();
-                }
+        buttonUpdateClass = findViewById(R.id.buttonUpdateClass);
+
+        loadClassData();
+
+        editTextDate.setOnClickListener(v -> showDatePicker());
+        buttonUpdateClass.setOnClickListener(v -> {
+            if (validateInputs()) {
+                updateClass();
             }
         });
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        onBackPressed();
-        return true;
+    private void loadClassData() {
+        new Thread(() -> {
+            Class classItem = db.classDao().getClassById(classId);
+            runOnUiThread(() -> {
+                if (classItem != null) {
+                    editTextDate.setText(classItem.date);
+                    editTextTeacher.setText(classItem.teacher);
+                    editTextComments.setText(classItem.comments);
+                }
+            });
+        }).start();
     }
 
     private void showDatePicker() {
@@ -106,29 +108,29 @@ public class CreateClassActivity extends AppCompatActivity {
                 .setPositiveButton("OK", null)
                 .show();
     }
-    private void saveCourse() {
-        int courseId = getIntent().getIntExtra("course_id", 1);
-        String day = new SimpleDateFormat("EEEE, dd/MM/yyyy", Locale.getDefault()).format(selectedDate.getTime());
+    private void updateClass() {
+        String day = editTextDate.getText().toString();
         String teacher = editTextTeacher.getText().toString();
         String comments = editTextComments.getText().toString();
-        final Class newClass = new Class(courseId, day, teacher, comments);
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                long result = AppDatabase.getDatabase(CreateClassActivity.this).classDao().insert(newClass);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (result != -1) {
-                            Toast.makeText(CreateClassActivity.this, "Đã lưu lớp học", Toast.LENGTH_SHORT).show();
-                            finish();
-                        } else {
-                            showAlertDialog("Lỗi", "Không thể lưu lớp học");
-                        }
-                    }
-                });
-            }
+        new Thread(() -> {
+            Class updatedClass = db.classDao().getClassById(classId);
+            updatedClass.date = day;
+            updatedClass.teacher = teacher;
+            updatedClass.comments = comments;
+
+            db.classDao().update(updatedClass);
+
+            runOnUiThread(() -> {
+                Toast.makeText(EditClassActivity.this, "Class updated successfully", Toast.LENGTH_SHORT).show();
+                finish();
+            });
         }).start();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 }

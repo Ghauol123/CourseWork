@@ -15,6 +15,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,6 +35,12 @@ public class EditCourseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_course);
+
+        // Thiết lập Toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(true);
 
         buttonPickDay = findViewById(R.id.button_pick_day);
         buttonPickTime = findViewById(R.id.button_pick_time);
@@ -146,10 +153,10 @@ public class EditCourseActivity extends AppCompatActivity {
     }
 
     private void updateCourse() {
-        SimpleDateFormat sdf = new SimpleDateFormat("EEEE", Locale.getDefault());
-        String dayOfWeek = sdf.format(selectedDate.getTime());
+        String day = new SimpleDateFormat("EEEE, dd/MM/yyyy", Locale.getDefault()).format(selectedDate.getTime());
+        // String dayOfWeek = day.format(selectedDate.getTime());
 
-        course.day = dayOfWeek;
+        course.day = day;
         course.time = buttonPickTime.getText().toString();
         course.capacity = Integer.parseInt(editTextCapacity.getText().toString());
         course.duration = Integer.parseInt(editTextDuration.getText().toString());
@@ -177,5 +184,11 @@ public class EditCourseActivity extends AppCompatActivity {
                 .setMessage(message)
                 .setPositiveButton("OK", null)
                 .show();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 }

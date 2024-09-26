@@ -13,12 +13,15 @@ public interface YogaCourseDao {
     @Insert
     long insert(YogaCourse course);
 
-    @Query("SELECT * FROM courses")
-    List<YogaCourse> getAllCourses();
-
     @Update
     int update(YogaCourse course);
 
     @Delete
     int delete(YogaCourse course);
+
+    @Query("SELECT * FROM courses")
+    List<YogaCourse> getAllCourses();
+
+    @Query("SELECT * FROM courses WHERE type = :type")
+    List<YogaCourse> getCoursesByType(String type);
 }

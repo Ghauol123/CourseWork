@@ -16,7 +16,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/primary_color"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:title="Create Course"
+            app:title="Edit Class"
             app:titleTextColor="@android:color/white"/>
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -33,34 +33,12 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:hint="Yoga Type">
-
-                <Spinner
-                    android:id="@+id/spinner_type"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_pick_day"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="Pick Date"
                 android:layout_marginBottom="16dp"
-                android:text="Pick Day"
-                app:backgroundTint="@color/secondary_color" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_pick_time"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:text="Pick Time"
                 app:backgroundTint="@color/secondary_color" />
 
             <com.google.android.material.textfield.TextInputLayout
@@ -68,13 +46,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:hint="Capacity">
+                android:hint="Teacher">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editText_capacity"
+                    android:id="@+id/editTextTeacher"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="number" />
+                    android:inputType="textPersonName" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -83,40 +61,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:hint="Duration (minutes)">
+                android:hint="Additional Comments">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editText_duration"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="number" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:hint="Price">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editText_price"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="numberDecimal" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:hint="Description">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editText_description"
+                    android:id="@+id/editTextComments"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textMultiLine"
@@ -125,10 +73,10 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_save_course"
+                android:id="@+id/buttonUpdateClass"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Save Course"
+                android:text="Update Class"
                 app:backgroundTint="@color/accent_color" />
 
         </LinearLayout>

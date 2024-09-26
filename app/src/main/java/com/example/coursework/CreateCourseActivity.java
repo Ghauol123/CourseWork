@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -31,6 +32,12 @@ public class CreateCourseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_course);
+
+        // Thiết lập Toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(true);
 
         DBHelper dbHelper = new DBHelper(this);
 
@@ -71,6 +78,12 @@ public class CreateCourseActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
     private void showDatePicker() {
@@ -128,7 +141,8 @@ public class CreateCourseActivity extends AppCompatActivity {
                 TextUtils.isEmpty(editTextCapacity.getText()) ||
                 TextUtils.isEmpty(editTextDuration.getText()) ||
                 TextUtils.isEmpty(editTextPrice.getText()) ||
-                TextUtils.isEmpty(editTextDescription.getText())) {
+                TextUtils.isEmpty(editTextDescription.getText())
+        || spinnerType.getSelectedItem().toString().equals("All")) {
 
             showAlertDialog("Thông báo", "Vui lòng điền đầy đủ tất cả các trường");
             return false;

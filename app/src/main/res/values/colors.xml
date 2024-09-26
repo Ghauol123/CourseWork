@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="primary_color">#2E7D32</color>
+    <color name="primary_dark_color">#1B5E20</color>
+    <color name="accent_color">#4CAF50</color>
+    <color name="secondary_color">#66BB6A</color>
+    <color name="background_color">#E8F5E9</color>
+    <color name="card_background">#FFFFFF</color>
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="text_tertiary">#9E9E9E</color>
+    <color name="icon_color">#4CAF50</color>
+    <color name="colorPrimary">#2E7D32</color>
+    <color name="colorAccent">#4CAF50</color>
+    <!-- Thêm định nghĩa mới cho card_stroke -->
+    <color name="card_stroke">#A5D6A7</color>
+    <!-- Thêm màu mới cho nền hộp thoại -->
+    <color name="dialog_background">#E0E0E0</color>
 </resources>
