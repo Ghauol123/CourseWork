@@ -13,9 +13,15 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import androidx.core.content.ContextCompat;
+import android.graphics.drawable.Drawable;
+import android.content.Context;
+import android.graphics.Color;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -136,26 +142,40 @@ public class CreateCourseActivity extends AppCompatActivity {
     }
 
     private boolean validateInputs() {
-        if (buttonPickDay.getText().toString().equals("Chọn ngày") ||
-                buttonPickTime.getText().toString().equals("Chọn giờ") ||
+        if (buttonPickDay.getText().toString().equals("Pick Day") ||
+                buttonPickTime.getText().toString().equals("Pick Time") ||
                 TextUtils.isEmpty(editTextCapacity.getText()) ||
                 TextUtils.isEmpty(editTextDuration.getText()) ||
                 TextUtils.isEmpty(editTextPrice.getText()) ||
                 TextUtils.isEmpty(editTextDescription.getText())
-        || spinnerType.getSelectedItem().toString().equals("All")) {
+            || spinnerType.getSelectedItem().toString().equals("All")) {
 
-            showAlertDialog("Thông báo", "Vui lòng điền đầy đủ tất cả các trường");
+            showAlertDialog(
+                getString(R.string.dialog_title_validation), 
+                getString(R.string.dialog_message_fill_all)
+            );
             return false;
         }
         return true;
     }
 
     private void showAlertDialog(String title, String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(title)
-                .setMessage(message)
-                .setPositiveButton("OK", null)
-                .show();
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setIcon(R.drawable.ic_warning)
+            .setBackground(ContextCompat.getDrawable(this, R.drawable.alert_dialog_background))
+            .setPositiveButton("OK", (dialog, which) -> {
+                dialog.dismiss();
+            });
+
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+        dialog.setOnShowListener(dialogInterface -> {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setTextColor(ContextCompat.getColor(this, R.color.primary_color));
+        });
+        
+        dialog.show();
     }
 
     private void saveCourse() {
@@ -172,15 +192,20 @@ public class CreateCourseActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                long result = AppDatabase.getDatabase(CreateCourseActivity.this).yogaCourseDao().insert(newCourse);
+                long result = AppDatabase.getDatabase(CreateCourseActivity.this)
+                    .yogaCourseDao().insert(newCourse);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         if (result != -1) {
-                            Toast.makeText(CreateCourseActivity.this, "Đã lưu khóa học", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(CreateCourseActivity.this, 
+                                "Course saved successfully", Toast.LENGTH_SHORT).show();
                             finish();
                         } else {
-                            showAlertDialog("Lỗi", "Không thể lưu khóa học");
+                            showAlertDialog(
+                                getString(R.string.dialog_title_error), 
+                                getString(R.string.dialog_message_save_failed)
+                            );
                         }
                     }
                 });

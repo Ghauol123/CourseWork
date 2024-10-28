@@ -33,50 +33,57 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="Teacher Name"
+                app:startIconDrawable="@drawable/ic_teacher"
+                app:startIconTint="@color/primary_color">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editText_teacherName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:hint="Comment"
+                app:startIconDrawable="@drawable/ic_class"
+                app:startIconTint="@color/primary_color">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editText_className"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_pick_day"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Pick Date"
                 android:layout_marginBottom="16dp"
+                android:text="Pick Day"
+                app:icon="@drawable/ic_calendar"
+                app:iconGravity="textStart"
                 app:backgroundTint="@color/secondary_color" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:hint="Teacher">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editTextTeacher"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPersonName" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:hint="Additional Comments">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/editTextComments"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textMultiLine"
-                    android:minLines="3" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonCreateClass"
+                android:id="@+id/button_save_class"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Create Class"
+                android:text="Save Class"
+                app:icon="@drawable/ic_save"
+                app:iconGravity="textStart"
                 app:backgroundTint="@color/accent_color" />
 
         </LinearLayout>

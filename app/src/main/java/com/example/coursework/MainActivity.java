@@ -60,9 +60,10 @@ public class MainActivity extends AppCompatActivity {
     private static final int EDIT_COURSE_REQUEST = 2;
     private static final String CHANNEL_ID = "DatabaseChangesChannel";
     private static final int NOTIFICATION_ID = 1;
-
     private FirebaseDatabase database;
     private DatabaseReference coursesRef;
+    // Thêm biến để lưu trữ type hiện tại
+    private String currentYogaType = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
         // Thiết lập Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         db = AppDatabase.getDatabase(this);
@@ -131,7 +132,21 @@ public class MainActivity extends AppCompatActivity {
         setupYogaTypeAutoComplete();
         loadCourses();
 
-        initializeFirebase();
+        // Lấy Firebase instances từ HomeActivity
+        database = HomeActivity.getDatabase();
+        coursesRef = HomeActivity.getCoursesRef();
+
+        // Thêm đoạn code này sau khi setupYogaTypeAutoComplete()
+        // Kiểm tra xem có yoga type được truyền từ HomeActivity không
+        String selectedYogaType = getIntent().getStringExtra("selected_yoga_type");
+        if (selectedYogaType != null && !selectedYogaType.isEmpty()) {
+            currentYogaType = selectedYogaType; // Lưu type hiện tại
+            autoCompleteTextViewYogaType.setText(selectedYogaType, false);
+            loadCoursesByType(selectedYogaType);
+        } else {
+            currentYogaType = null;
+            loadCourses();
+        }
     }
 
     private void setupYogaTypeAutoComplete() {
@@ -144,8 +159,10 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String selectedType = (String) parent.getItemAtPosition(position);
                 if (!selectedType.equals("All")) {
+                    currentYogaType = selectedType; // Cập nhật type hiện tại
                     loadCoursesByType(selectedType);
                 } else {
+                    currentYogaType = null; // Reset type khi chọn All
                     loadCourses();
                 }
             }
@@ -153,14 +170,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showDeleteConfirmationDialog(YogaCourse course) {
-        new MaterialAlertDialogBuilder(this, R.style.AlertDialogTheme)
-                .setTitle("Delete Course")
-                .setMessage("Are you sure you want to delete this course?")
-                .setIcon(R.drawable.ic_warning)
-                .setPositiveButton("Delete", (dialog, which) -> deleteCourse(course))
-                .setNegativeButton("Cancel", null)
-                .setBackground(ContextCompat.getDrawable(this, R.drawable.alert_dialog_background))
-                .show();
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.delete_course_title))
+            .setMessage(getString(R.string.delete_course_message))
+            .setIcon(R.drawable.ic_warning)
+            .setBackground(ContextCompat.getDrawable(this, R.drawable.alert_dialog_background))
+            .setPositiveButton(getString(R.string.delete), (dialog, which) -> {
+                deleteCourse(course);
+            })
+            .setNegativeButton(getString(R.string.cancel), null);
+
+        AlertDialog dialog = builder.create();
+        dialog.setOnShowListener(dialogInterface -> {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setTextColor(ContextCompat.getColor(this, R.color.delete_red));
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                .setTextColor(ContextCompat.getColor(this, R.color.text_primary));
+        });
+        
+        dialog.show();
     }
 
     private void deleteCourse(YogaCourse course) {
@@ -181,10 +209,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == CREATE_COURSE_REQUEST && resultCode == RESULT_OK) {
-            loadCourses();
-        } else if (requestCode == EDIT_COURSE_REQUEST && resultCode == RESULT_OK) {
-            loadCourses();
+        if ((requestCode == CREATE_COURSE_REQUEST || requestCode == EDIT_COURSE_REQUEST) 
+            && resultCode == RESULT_OK) {
+            // Kiểm tra type hiện tại để load đúng danh sách
+            if (currentYogaType != null && !currentYogaType.isEmpty()) {
+                loadCoursesByType(currentYogaType);
+            } else {
+                loadCourses();
+            }
         }
     }
 
@@ -204,6 +236,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadCoursesByType(String type) {
+        Log.d("MainActivity", "Loading courses for type: " + type);
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -212,6 +245,11 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         adapter.updateCourses(courses);
+                        if (courses.isEmpty()) {
+                            Toast.makeText(MainActivity.this, 
+                                "No courses found for " + type, 
+                                Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
             }
@@ -221,18 +259,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Kiểm tra và khởi tạo lại kết nối Firebase nếu cần
-        if (database == null || coursesRef == null) {
-            initializeFirebase();
+        // Kiểm tra type hiện tại để load đúng danh sách
+        if (currentYogaType != null && !currentYogaType.isEmpty()) {
+            loadCoursesByType(currentYogaType);
+        } else {
+            loadCourses();
         }
-        loadCourses();
-    }
-
-    private void initializeFirebase() {
-        database = FirebaseDatabase.getInstance("https://yoga-course1-default-rtdb.asia-southeast1.firebasedatabase.app/");
-        database.setPersistenceEnabled(true);
-        coursesRef = database.getReference("Courses");
-        coursesRef.keepSynced(true);
     }
 
     private void updateFirebaseWithData() {
@@ -321,5 +353,17 @@ public class MainActivity extends AppCompatActivity {
             return activeNetworkInfo != null && activeNetworkInfo.isConnected();
         }
         return false;
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Không cần đóng kết nối Firebase ở đây nữa vì được quản lý bởi HomeActivity
     }
 }

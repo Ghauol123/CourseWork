@@ -13,9 +13,13 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatDialog;
+import androidx.appcompat.app.AppCompatDialogFragment;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -179,11 +183,22 @@ public class EditCourseActivity extends AppCompatActivity {
     }
 
     private void showAlertDialog(String title, String message) {
-        new AlertDialog.Builder(this)
-                .setTitle(title)
-                .setMessage(message)
-                .setPositiveButton("OK", null)
-                .show();
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setIcon(R.drawable.ic_warning)
+            .setBackground(ContextCompat.getDrawable(this, R.drawable.alert_dialog_background))
+            .setPositiveButton(getString(R.string.dialog_button_ok), (dialog, which) -> {
+                dialog.dismiss();
+            });
+
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+        dialog.setOnShowListener(dialogInterface -> {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setTextColor(ContextCompat.getColor(this, R.color.primary_color));
+        });
+        
+        dialog.show();
     }
 
     @Override

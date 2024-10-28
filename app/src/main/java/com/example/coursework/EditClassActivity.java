@@ -12,6 +12,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -39,9 +42,9 @@ public class EditClassActivity extends AppCompatActivity {
         classId = getIntent().getIntExtra("class_id", -1);
 
         editTextDate = findViewById(R.id.button_pick_day);
-        editTextTeacher = findViewById(R.id.editTextTeacher);
-        editTextComments = findViewById(R.id.editTextComments);
-        buttonUpdateClass = findViewById(R.id.buttonUpdateClass);
+        editTextTeacher = findViewById(R.id.editText_teacherName);
+        editTextComments = findViewById(R.id.editText_className);
+        buttonUpdateClass = findViewById(R.id.button_update_class);
 
         loadClassData();
 
@@ -99,11 +102,22 @@ public class EditClassActivity extends AppCompatActivity {
         return true;
     }
     private void showAlertDialog(String title, String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(title)
-                .setMessage(message)
-                .setPositiveButton("OK", null)
-                .show();
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setIcon(R.drawable.ic_warning)
+            .setBackground(ContextCompat.getDrawable(this, R.drawable.alert_dialog_background))
+            .setPositiveButton(getString(R.string.dialog_button_ok), (dialog, which) -> {
+                dialog.dismiss();
+            });
+
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+        dialog.setOnShowListener(dialogInterface -> {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                .setTextColor(ContextCompat.getColor(this, R.color.primary_color));
+        });
+        
+        dialog.show();
     }
     private void updateClass() {
         String day = editTextDate.getText().toString();

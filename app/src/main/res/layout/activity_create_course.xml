@@ -38,7 +38,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:hint="Yoga Type">
+                android:hint="Yoga Type"
+                app:startIconTint="@color/primary_color">
 
                 <Spinner
                     android:id="@+id/spinner_type"
@@ -53,6 +54,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:text="Pick Day"
+                app:icon="@drawable/ic_calendar"
+                app:iconGravity="textStart"
                 app:backgroundTint="@color/secondary_color" />
 
             <com.google.android.material.button.MaterialButton
@@ -61,6 +64,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:text="Pick Time"
+                app:icon="@drawable/ic_time"
+                app:iconGravity="textStart"
                 app:backgroundTint="@color/secondary_color" />
 
             <com.google.android.material.textfield.TextInputLayout
@@ -68,7 +73,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:hint="Capacity">
+                android:hint="Capacity"
+                app:startIconDrawable="@drawable/ic_people"
+                app:startIconTint="@color/primary_color">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editText_capacity"
@@ -83,7 +90,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:hint="Duration (minutes)">
+                android:hint="Duration (minutes)"
+                app:startIconDrawable="@drawable/ic_duration"
+                app:startIconTint="@color/primary_color">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editText_duration"
@@ -98,7 +107,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:hint="Price">
+                android:hint="Price"
+                app:startIconDrawable="@drawable/ic_price"
+                app:startIconTint="@color/primary_color">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editText_price"
@@ -113,7 +124,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:hint="Description">
+                android:hint="Description"
+                app:startIconDrawable="@drawable/ic_description"
+                app:startIconTint="@color/primary_color">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editText_description"
@@ -129,6 +142,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Save Course"
+                app:icon="@drawable/ic_save"
+                app:iconGravity="textStart"
                 app:backgroundTint="@color/accent_color" />
 
         </LinearLayout>
