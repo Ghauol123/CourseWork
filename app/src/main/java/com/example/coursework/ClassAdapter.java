@@ -1,9 +1,59 @@
+//package com.example.coursework;
+//
+//import android.view.LayoutInflater;
+//import android.view.View;
+//import android.view.ViewGroup;
+//import android.widget.TextView;
+//
+//import androidx.annotation.NonNull;
+//import androidx.recyclerview.widget.RecyclerView;
+//
+//import java.util.List;
+//
+//public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHolder> {
+//
+//    private List<Class> classes;
+//
+//    public ClassAdapter(List<Class> classes) {
+//        this.classes = classes;
+//    }
+//
+//    @NonNull
+//    @Override
+//    public ClassViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+//        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.class_item, parent, false);
+//        return new ClassViewHolder(view);
+//    }
+//
+//    @Override
+//    public void onBindViewHolder(@NonNull ClassViewHolder holder, int position) {
+//        Class classItem = classes.get(position);
+//        holder.textViewDate.setText("Date: " + classItem.date);
+//        holder.textViewTeacher.setText("Teacher: " + classItem.teacher);
+//        holder.textViewComments.setText("Comments: " + classItem.comments);
+//    }
+//
+//    @Override
+//    public int getItemCount() {
+//        return classes.size();
+//    }
+//
+//    static class ClassViewHolder extends RecyclerView.ViewHolder {
+//        TextView textViewDate, textViewTeacher, textViewComments;
+//
+//        public ClassViewHolder(View itemView) {
+//            super(itemView);
+//            textViewDate = itemView.findViewById(R.id.textViewDate);
+//            textViewTeacher = itemView.findViewById(R.id.textViewTeacher);
+//            textViewComments = itemView.findViewById(R.id.textViewComments);
+//        }
+//    }
+//}
 package com.example.coursework;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -13,21 +63,9 @@ import java.util.List;
 
 public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHolder> {
     private List<Class> classList;
-    private OnClassClickListener listener;
-    private OnClassDeleteListener deleteListener;
 
-    public interface OnClassClickListener {
-        void onClassClick(Class classItem);
-    }
-
-    public interface OnClassDeleteListener {
-        void onClassDelete(Class classItem);
-    }
-
-    public ClassAdapter(List<Class> classList, OnClassClickListener listener, OnClassDeleteListener deleteListener) {
+    public ClassAdapter(List<Class> classList) {
         this.classList = classList;
-        this.listener = listener;
-        this.deleteListener = deleteListener;
     }
 
     @Override
@@ -40,21 +78,8 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
     @Override
     public void onBindViewHolder(ClassViewHolder holder, int position) {
         Class classItem = classList.get(position);
-        holder.textViewDate.setText(classItem.date);
-        holder.textViewClassInfo.setText(classItem.teacher);
+        holder.textViewClassInfo.setText(classItem.date + " - " + classItem.teacher);
         holder.textViewComments.setText(classItem.comments);
-
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onClassClick(classItem);
-            }
-        });
-
-        holder.buttonDelete.setOnClickListener(v -> {
-            if (deleteListener != null) {
-                deleteListener.onClassDelete(classItem);
-            }
-        });
     }
 
     @Override
@@ -65,15 +90,11 @@ public class ClassAdapter extends RecyclerView.Adapter<ClassAdapter.ClassViewHol
     public static class ClassViewHolder extends RecyclerView.ViewHolder {
         public TextView textViewClassInfo;
         public TextView textViewComments;
-        public TextView textViewDate;
-        public ImageButton buttonDelete;
 
         public ClassViewHolder(View itemView) {
             super(itemView);
             textViewClassInfo = itemView.findViewById(R.id.textViewTeacher);
-            textViewDate = itemView.findViewById(R.id.textViewDate);
-            textViewComments = itemView.findViewById(R.id.textViewComments);
-            buttonDelete = itemView.findViewById(R.id.buttonDelete);
+            textViewComments = itemView.findViewById(R.id.textViewDate);
         }
     }
 }
