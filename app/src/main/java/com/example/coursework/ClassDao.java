@@ -14,7 +14,7 @@ public interface ClassDao {
     long insert(Class classItem);
 
     @Update
-    void update(Class classItem);
+    int update(Class classItem);
 
     @Delete
     void delete(Class classItem);

@@ -2,13 +2,20 @@ package com.example.coursework;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 import android.widget.ArrayAdapter;
@@ -45,7 +52,7 @@ public class CreateCourseActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
 
-        DBHelper dbHelper = new DBHelper(this);
+//        DBHelper dbHelper = new DBHelper(this);
 
         buttonPickDay = findViewById(R.id.button_pick_day);
         buttonPickTime = findViewById(R.id.button_pick_time);
@@ -198,9 +205,7 @@ public class CreateCourseActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         if (result != -1) {
-                            Toast.makeText(CreateCourseActivity.this, 
-                                "Course saved successfully", Toast.LENGTH_SHORT).show();
-                            finish();
+                            showSuccessDialog();
                         } else {
                             showAlertDialog(
                                 getString(R.string.dialog_title_error), 
@@ -211,5 +216,42 @@ public class CreateCourseActivity extends AppCompatActivity {
                 });
             }
         }).start();
+    }
+
+    private void showSuccessDialog() {
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_success);
+        
+        // Set up window
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                            WindowManager.LayoutParams.WRAP_CONTENT);
+            window.setBackgroundDrawable(ContextCompat.getDrawable(this, 
+                                       R.drawable.alert_dialog_background));
+        }
+
+        // Initialize views
+        ImageView imageViewSuccess = dialog.findViewById(R.id.imageView_success);
+        TextView textViewTitle = dialog.findViewById(R.id.textView_title);
+        TextView textViewMessage = dialog.findViewById(R.id.textView_message);
+        Button buttonOk = dialog.findViewById(R.id.button_ok);
+
+        // Set content
+        textViewTitle.setText(getString(R.string.dialog_title_success));
+        textViewMessage.setText(getString(R.string.dialog_message_course_saved));
+
+        // Apply animation
+        Animation animation = AnimationUtils.loadAnimation(this, R.anim.success_animation);
+        imageViewSuccess.startAnimation(animation);
+
+        // Set button click listener
+        buttonOk.setOnClickListener(v -> {
+            dialog.dismiss();
+            finish();
+        });
+
+        dialog.show();
     }
 }

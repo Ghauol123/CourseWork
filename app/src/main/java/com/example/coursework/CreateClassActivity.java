@@ -2,13 +2,20 @@ package com.example.coursework;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -94,10 +101,10 @@ public class CreateClassActivity extends AppCompatActivity {
         editTextDate.setText(dateString);
     }
     private boolean validateInputs() {
-        if (editTextDate.getText().toString().equals("Chọn ngày") ||
+        if (editTextDate.getText().toString().equals("Select a date") ||
                 TextUtils.isEmpty(editTextTeacher.getText())){
 
-            showAlertDialog("Thông báo", "Vui lòng điền đầy đủ tất cả các trường");
+            showAlertDialog("Alert", "Please fill in all fields");
             return false;
         }
         return true;
@@ -135,14 +142,50 @@ public class CreateClassActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         if (result != -1) {
-                            Toast.makeText(CreateClassActivity.this, "Đã lưu lớp học", Toast.LENGTH_SHORT).show();
-                            finish();
+                            showSuccessDialog();
                         } else {
-                            showAlertDialog("Lỗi", "Không thể lưu lớp học");
+                            showAlertDialog("Error", "Could not save class");
                         }
                     }
                 });
             }
         }).start();
+    }
+
+    private void showSuccessDialog() {
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_success);
+        
+        // Set up window
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, 
+                            WindowManager.LayoutParams.WRAP_CONTENT);
+            window.setBackgroundDrawable(ContextCompat.getDrawable(this, 
+                               R.drawable.alert_dialog_background));
+        }
+
+        // Initialize views
+        ImageView imageViewSuccess = dialog.findViewById(R.id.imageView_success);
+        TextView textViewTitle = dialog.findViewById(R.id.textView_title);
+        TextView textViewMessage = dialog.findViewById(R.id.textView_message);
+        Button buttonOk = dialog.findViewById(R.id.button_ok);
+
+        // Set content
+        textViewTitle.setText("Success");
+        textViewMessage.setText("Class saved successfully");
+
+        // Apply animation
+        Animation animation = AnimationUtils.loadAnimation(this, R.anim.success_animation);
+        imageViewSuccess.startAnimation(animation);
+
+        // Set button click listener
+        buttonOk.setOnClickListener(v -> {
+            dialog.dismiss();
+            finish();
+        });
+
+        dialog.show();
     }
 }

@@ -2,15 +2,22 @@ package com.example.coursework;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,6 +41,7 @@ public class EditCourseActivity extends AppCompatActivity {
     Calendar selectedTime = Calendar.getInstance();
     Spinner spinnerType;
     YogaCourse course;
+    private AppDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +62,7 @@ public class EditCourseActivity extends AppCompatActivity {
         editTextDescription = findViewById(R.id.editText_description);
         buttonUpdateCourse = findViewById(R.id.button_update_course);
         spinnerType = findViewById(R.id.spinner_type);
-
+        db = AppDatabase.getDatabase(this);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.yoga_types, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -77,7 +85,7 @@ public class EditCourseActivity extends AppCompatActivity {
     private void populateFields() {
         // Chuyển đổi tên thứ thành ngày trong tuần
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("EEEE", Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat("EEEE, dd/MM/yyyy", Locale.getDefault());
             Date date = sdf.parse(course.day);
             selectedDate.setTime(date);
         } catch (ParseException e) {
@@ -131,7 +139,7 @@ public class EditCourseActivity extends AppCompatActivity {
     }
 
     private void updateDateButtonText() {
-        SimpleDateFormat sdf = new SimpleDateFormat("EEEE", Locale.getDefault());
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE, dd/MM/yyyy", Locale.getDefault());
         String dayOfWeek = sdf.format(selectedDate.getTime());
         buttonPickDay.setText(dayOfWeek);
     }
@@ -143,14 +151,14 @@ public class EditCourseActivity extends AppCompatActivity {
     }
 
     private boolean validateInputs() {
-        if (buttonPickDay.getText().toString().equals("Chọn ngày") ||
-                buttonPickTime.getText().toString().equals("Chọn giờ") ||
+        if (buttonPickDay.getText().toString().equals("Pick Date") ||
+                buttonPickTime.getText().toString().equals("Pick Time") ||
                 TextUtils.isEmpty(editTextCapacity.getText()) ||
                 TextUtils.isEmpty(editTextDuration.getText()) ||
                 TextUtils.isEmpty(editTextPrice.getText()) ||
                 TextUtils.isEmpty(editTextDescription.getText())) {
 
-            showAlertDialog("Thông báo", "Vui lòng điền đầy đủ tất cả các trường");
+            showAlertDialog("Alert", "Please fill in all fields");
             return false;
         }
         return true;
@@ -158,7 +166,6 @@ public class EditCourseActivity extends AppCompatActivity {
 
     private void updateCourse() {
         String day = new SimpleDateFormat("EEEE, dd/MM/yyyy", Locale.getDefault()).format(selectedDate.getTime());
-        // String dayOfWeek = day.format(selectedDate.getTime());
 
         course.day = day;
         course.time = buttonPickTime.getText().toString();
@@ -169,17 +176,47 @@ public class EditCourseActivity extends AppCompatActivity {
         course.description = editTextDescription.getText().toString();
 
         new Thread(() -> {
-            int result = AppDatabase.getDatabase(EditCourseActivity.this).yogaCourseDao().update(course);
+            int result = db.yogaCourseDao().update(course);
             runOnUiThread(() -> {
                 if (result > 0) {
-                    Toast.makeText(EditCourseActivity.this, "Đã cập nhật khóa học", Toast.LENGTH_SHORT).show();
-                    setResult(RESULT_OK);
-                    finish();
+                    showSuccessDialog();
                 } else {
-                    showAlertDialog("Lỗi", "Không thể cập nhật khóa học");
+                    showAlertDialog("Error", "Course could not be updated");
                 }
             });
         }).start();
+    }
+
+    private void showSuccessDialog() {
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_success);
+        
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, 
+                            WindowManager.LayoutParams.WRAP_CONTENT);
+            window.setBackgroundDrawable(ContextCompat.getDrawable(this, 
+                               R.drawable.alert_dialog_background));
+        }
+
+        ImageView imageViewSuccess = dialog.findViewById(R.id.imageView_success);
+        TextView textViewTitle = dialog.findViewById(R.id.textView_title);
+        TextView textViewMessage = dialog.findViewById(R.id.textView_message);
+        Button buttonOk = dialog.findViewById(R.id.button_ok);
+
+        textViewTitle.setText("Success");
+        textViewMessage.setText("Course updated successfully");
+        Animation animation = AnimationUtils.loadAnimation(this, R.anim.success_animation);
+        imageViewSuccess.startAnimation(animation);
+
+        buttonOk.setOnClickListener(v -> {
+            dialog.dismiss();
+            setResult(RESULT_OK);
+            finish();
+        });
+
+        dialog.show();
     }
 
     private void showAlertDialog(String title, String message) {

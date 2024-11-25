@@ -20,7 +20,7 @@ public class YogaCourseAdapter extends RecyclerView.Adapter<YogaCourseAdapter.Co
     }
 
     public interface OnItemClickListener {
-        void onItemClick(YogaCourse course);
+//        void onItemClick(YogaCourse course);
         void onEditClick(YogaCourse course);
         void onDeleteClick(YogaCourse course);
         void onClassClick(YogaCourse course);
@@ -63,12 +63,12 @@ public class YogaCourseAdapter extends RecyclerView.Adapter<YogaCourseAdapter.Co
                 listener.onClassClick(course);
             }
         });
-
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onItemClick(course);
-            }
-        });
+//
+//        holder.itemView.setOnClickListener(v -> {
+//            if (listener != null) {
+//                listener.onItemClick(course);
+//            }
+//        });
     }
 
     @Override

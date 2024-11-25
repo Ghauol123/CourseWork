@@ -10,7 +10,7 @@ import java.util.List;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.DatabaseReference;
 import android.util.Log;
-
+// khởi tạo Firebase, RecyclerView, CourseTypeAdapter, và danh sách courseTypes
 public class HomeActivity extends AppCompatActivity {
     
     private RecyclerView recyclerView;
@@ -25,7 +25,6 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        // Khởi tạo Firebase ngay từ đầu
         initializeFirebase();
 
         recyclerView = findViewById(R.id.recyclerViewCourseTypes);
@@ -33,14 +32,12 @@ public class HomeActivity extends AppCompatActivity {
 
         initializeCourseTypes();
         
-        adapter = new CourseTypeAdapter(this, courseTypes, this);
+        adapter = new CourseTypeAdapter(courseTypes);
         adapter.setOnItemClickListener(new CourseTypeAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(CourseType courseType) {
                 Intent intent = new Intent(HomeActivity.this, MainActivity.class);
-                // Thay đổi flag để cho phép quay lại HomeActivity
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                // Truyền yoga type qua intent
                 intent.putExtra("selected_yoga_type", courseType.getName());
                 startActivity(intent);
             }
@@ -51,7 +48,7 @@ public class HomeActivity extends AppCompatActivity {
     private void initializeFirebase() {
         try {
             if (database == null) {
-                database = FirebaseDatabase.getInstance("https://yoga-course1-default-rtdb.asia-southeast1.firebasedatabase.app/");
+                database = FirebaseDatabase.getInstance("https://yoga-course-default-rtdb.asia-southeast1.firebasedatabase.app/");
                 database.setPersistenceEnabled(true);
             }
             if (coursesRef == null) {
@@ -63,7 +60,6 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    // Thêm getter cho Firebase instances
     public static FirebaseDatabase getDatabase() {
         return database;
     }
@@ -75,10 +71,8 @@ public class HomeActivity extends AppCompatActivity {
     private void initializeCourseTypes() {
         courseTypes = new ArrayList<>();
         
-        // Lấy mảng yoga_types từ resources
         String[] yogaTypes = getResources().getStringArray(R.array.yoga_types);
         
-        // Thêm các loại yoga vào danh sách (bỏ qua "All" ở vị trí đầu tiên)
         for (int i = 1; i < yogaTypes.length; i++) {
             String name = yogaTypes[i];
             String description = getYogaDescription(name);
@@ -91,8 +85,8 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
+
     private String getYogaDescription(String yogaType) {
-        // Mô tả cho từng loại yoga
         switch (yogaType) {
             case "Hatha Yoga":
                 return "A gentle, basic form of yoga that promotes physical and mental well-being";
@@ -111,7 +105,7 @@ public class HomeActivity extends AppCompatActivity {
     private int getYogaImage(String yogaType) {
         switch (yogaType) {
             case "Hatha Yoga":
-                return R.drawable.yoga_hatha; // Đổi tên file theo quy tắc
+                return R.drawable.yoga_hatha;
             case "Vinyasa Yoga":
                 return R.drawable.yoga_vinyasa;
             case "Ashtanga Yoga":

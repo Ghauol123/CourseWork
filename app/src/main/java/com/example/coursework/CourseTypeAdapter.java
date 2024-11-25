@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -13,14 +14,15 @@ import java.util.List;
 
 public class CourseTypeAdapter extends RecyclerView.Adapter<CourseTypeAdapter.CourseTypeViewHolder> {
     private static List<CourseType> courseTypes;
-    private Context context;
     private static OnItemClickListener listener;
 
-    public CourseTypeAdapter(Context context, List<CourseType> courseTypes, HomeActivity homeActivity) {
-        this.context = context;
+    public CourseTypeAdapter(List<CourseType> courseTypes) {
         this.courseTypes = courseTypes;
     }
 
+    public interface OnItemClickListener {
+        void onItemClick(CourseType courseType);
+    }
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
     }
@@ -28,7 +30,7 @@ public class CourseTypeAdapter extends RecyclerView.Adapter<CourseTypeAdapter.Co
     @NonNull
     @Override
     public CourseTypeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_course_type, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_course_type, parent, false);
         return new CourseTypeViewHolder(view);
     }
 
@@ -38,6 +40,14 @@ public class CourseTypeAdapter extends RecyclerView.Adapter<CourseTypeAdapter.Co
         holder.textYogaType.setText(courseType.getName());
         holder.textYogaDescription.setText(courseType.getDescription());
         holder.imageYogaType.setImageResource(courseType.getImageResourceId());
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listener != null) {
+                    listener.onItemClick(courseType);
+                }
+            }
+        });
     }
 
     @Override
@@ -56,19 +66,15 @@ public class CourseTypeAdapter extends RecyclerView.Adapter<CourseTypeAdapter.Co
             textYogaType = itemView.findViewById(R.id.textYogaType);
             textYogaDescription = itemView.findViewById(R.id.textYogaDescription);
 
-            // Thêm click listener cho itemView
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (listener != null && getAdapterPosition() != RecyclerView.NO_POSITION) {
-                        listener.onItemClick(courseTypes.get(getAdapterPosition()));
-                    }
-                }
-            });
+//            // Thêm click listener cho itemView
+//            itemView.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    if (listener != null && getAdapterPosition() != RecyclerView.NO_POSITION) {
+//                        listener.onItemClick(courseTypes.get(getAdapterPosition()));
+//                    }
+//                }
+//            });
         }
-    }
-
-    public interface OnItemClickListener {
-        void onItemClick(CourseType courseType);
     }
 }

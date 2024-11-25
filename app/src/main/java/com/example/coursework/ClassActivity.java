@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,6 +30,11 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import androidx.core.content.ContextCompat;
+import android.app.Dialog;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -45,6 +51,8 @@ public class ClassActivity extends AppCompatActivity implements ClassAdapter.OnC
     private YogaCourse course;
     private AppDatabase db;
     private Calendar selectedDate = Calendar.getInstance();
+    private TextView textViewNoClasses;
+    private Button buttonClear;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +85,9 @@ public class ClassActivity extends AppCompatActivity implements ClassAdapter.OnC
 //        });
         recyclerViewClasses.setLayoutManager(new LinearLayoutManager(this));
 
+        buttonClear = findViewById(R.id.buttonClear);
+        buttonClear.setOnClickListener(v -> clearAllFilters());
+
         editTextSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -87,10 +98,9 @@ public class ClassActivity extends AppCompatActivity implements ClassAdapter.OnC
             @Override
             public void afterTextChanged(Editable s) {
                 loadClassesForCourse(course.getId(), s.toString(), "", "");
+                updateClearButtonVisibility();
             }
         });
-
-        buttonPickDate.setOnClickListener(v -> showDatePicker());
 
         editTextDayOfWeek.addTextChangedListener(new TextWatcher() {
             @Override
@@ -102,8 +112,11 @@ public class ClassActivity extends AppCompatActivity implements ClassAdapter.OnC
             @Override
             public void afterTextChanged(Editable s) {
                 loadClassesForCourse(course.getId(), "", s.toString(), "");
+                updateClearButtonVisibility();
             }
         });
+
+        buttonPickDate.setOnClickListener(v -> showDatePicker());
 
         FloatingActionButton fabAddClass = findViewById(R.id.fabAddClass);
         fabAddClass.setOnClickListener(new View.OnClickListener() {
@@ -114,6 +127,8 @@ public class ClassActivity extends AppCompatActivity implements ClassAdapter.OnC
                 startActivity(intent);
             }
         });
+
+        textViewNoClasses = findViewById(R.id.textViewNoClasses);
     }
 
     private void updateCourseInfo() {
@@ -135,10 +150,15 @@ public class ClassActivity extends AppCompatActivity implements ClassAdapter.OnC
                 classList = db.classDao().getClassesForCourse(courseId);
             }
             runOnUiThread(() -> {
-                if (classList != null && !classList.isEmpty()) {
-                    setupRecyclerView(classList);
-                } else {
-                    Toast.makeText(ClassActivity.this, "Không có lớp học nào", Toast.LENGTH_SHORT).show();
+                if (classList != null) {
+                    if (classList.isEmpty()) {
+                        recyclerViewClasses.setVisibility(View.GONE);
+                        textViewNoClasses.setVisibility(View.VISIBLE);
+                    } else {
+                        recyclerViewClasses.setVisibility(View.VISIBLE);
+                        textViewNoClasses.setVisibility(View.GONE);
+                        setupRecyclerView(classList);
+                    }
                 }
             });
         }).start();
@@ -165,11 +185,11 @@ public class ClassActivity extends AppCompatActivity implements ClassAdapter.OnC
     @Override
     public void onClassDelete(Class classItem) {
         new MaterialAlertDialogBuilder(this, R.style.AlertDialogTheme)
-                .setTitle("Xác nhận xóa")
-                .setMessage("Bạn có chắc chắn muốn xóa lớp học này?")
+                .setTitle("Confirm deletion")
+                .setMessage("Are you sure you want to delete this class?")
                 .setIcon(R.drawable.ic_warning)
-                .setPositiveButton("Xóa", (dialog, which) -> deleteClass(classItem))
-                .setNegativeButton("Hủy", null)
+                .setPositiveButton("Delete", (dialog, which) -> deleteClass(classItem))
+                .setNegativeButton("Cancel", null)
                 .setBackground(ContextCompat.getDrawable(this, R.drawable.alert_dialog_background))
                 .show();
     }
@@ -178,10 +198,58 @@ public class ClassActivity extends AppCompatActivity implements ClassAdapter.OnC
         new Thread(() -> {
             db.classDao().delete(classItem);
             runOnUiThread(() -> {
-                Toast.makeText(ClassActivity.this, "Đã xóa lớp học", Toast.LENGTH_SHORT).show();
-                loadClassesForCourse(course.getId(), "", "", "");
+                showSuccessDeleteDialog();
             });
         }).start();
+    }
+
+    private void showSuccessDeleteDialog() {
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_success);
+        
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, 
+                            WindowManager.LayoutParams.WRAP_CONTENT);
+            window.setBackgroundDrawable(ContextCompat.getDrawable(this, 
+                               R.drawable.alert_dialog_background));
+        }
+
+        ImageView imageViewSuccess = dialog.findViewById(R.id.imageView_success);
+        TextView textViewTitle = dialog.findViewById(R.id.textView_title);
+        TextView textViewMessage = dialog.findViewById(R.id.textView_message);
+        Button buttonOk = dialog.findViewById(R.id.button_ok);
+
+        textViewTitle.setText("Success");
+        textViewMessage.setText("Class deleted successfully");
+
+        Animation animation = AnimationUtils.loadAnimation(this, R.anim.success_animation);
+        imageViewSuccess.startAnimation(animation);
+
+        buttonOk.setOnClickListener(v -> {
+            dialog.dismiss();
+            loadClassesForCourse(course.getId(), editTextSearch.getText().toString(), 
+                               editTextDayOfWeek.getText().toString(), "");
+        });
+
+        dialog.show();
+    }
+
+    private void clearAllFilters() {
+        editTextSearch.setText("");
+        editTextDayOfWeek.setText("");
+        buttonPickDate.setText("Pick Date");
+        loadClassesForCourse(course.getId(), "", "", "");
+        updateClearButtonVisibility();
+    }
+
+    private void updateClearButtonVisibility() {
+        boolean hasFilters = !editTextSearch.getText().toString().isEmpty() ||
+                           !editTextDayOfWeek.getText().toString().isEmpty() ||
+                           !buttonPickDate.getText().toString().equals("Pick Date");
+        
+        buttonClear.setVisibility(hasFilters ? View.VISIBLE : View.GONE);
     }
 
     private void showDatePicker() {
@@ -191,8 +259,11 @@ public class ClassActivity extends AppCompatActivity implements ClassAdapter.OnC
                     selectedDate.set(Calendar.YEAR, year);
                     selectedDate.set(Calendar.MONTH, month);
                     selectedDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                    String dateString = new SimpleDateFormat("EEEE, dd/MM/yyyy", Locale.getDefault()).format(selectedDate.getTime());
+                    SimpleDateFormat sdf = new SimpleDateFormat("EEEE, dd/MM/yyyy", Locale.getDefault());
+                    String dateString = sdf.format(selectedDate.getTime());
+                    buttonPickDate.setText(dateString);
                     loadClassesForCourse(course.getId(), "", "", dateString);
+                    updateClearButtonVisibility();
                 },
                 selectedDate.get(Calendar.YEAR),
                 selectedDate.get(Calendar.MONTH),

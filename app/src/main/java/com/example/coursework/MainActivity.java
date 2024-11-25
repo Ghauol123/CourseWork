@@ -47,6 +47,17 @@ import androidx.annotation.NonNull;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.OnFailureListener;
 
+import android.widget.TextView;
+
+import android.content.res.Configuration;
+
+import android.app.Dialog;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
+
 public class MainActivity extends AppCompatActivity {
     AppDatabase db;
     RecyclerView recyclerView;
@@ -58,15 +69,17 @@ public class MainActivity extends AppCompatActivity {
     private boolean databaseChanged = false;
     private static final int CREATE_COURSE_REQUEST = 1;
     private static final int EDIT_COURSE_REQUEST = 2;
-    private static final String CHANNEL_ID = "DatabaseChangesChannel";
-    private static final int NOTIFICATION_ID = 1;
+//    private static final String CHANNEL_ID = "DatabaseChangesChannel";
+//    private static final int NOTIFICATION_ID = 1;
     private FirebaseDatabase database;
     private DatabaseReference coursesRef;
     // Thêm biến để lưu trữ type hiện tại
     private String currentYogaType = null;
+    private TextView textViewNoCourses;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -89,10 +102,6 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         adapter.setOnItemClickListener(new YogaCourseAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(YogaCourse course) {
-                // Handle item click if needed
-            }
 
             @Override
             public void onEditClick(YogaCourse course) {
@@ -136,8 +145,6 @@ public class MainActivity extends AppCompatActivity {
         database = HomeActivity.getDatabase();
         coursesRef = HomeActivity.getCoursesRef();
 
-        // Thêm đoạn code này sau khi setupYogaTypeAutoComplete()
-        // Kiểm tra xem có yoga type được truyền từ HomeActivity không
         String selectedYogaType = getIntent().getStringExtra("selected_yoga_type");
         if (selectedYogaType != null && !selectedYogaType.isEmpty()) {
             currentYogaType = selectedYogaType; // Lưu type hiện tại
@@ -147,6 +154,8 @@ public class MainActivity extends AppCompatActivity {
             currentYogaType = null;
             loadCourses();
         }
+
+        textViewNoCourses = findViewById(R.id.textViewNoCourses);
     }
 
     private void setupYogaTypeAutoComplete() {
@@ -196,20 +205,72 @@ public class MainActivity extends AppCompatActivity {
             int result = db.yogaCourseDao().delete(course);
             runOnUiThread(() -> {
                 if (result > 0) {
-                    Toast.makeText(MainActivity.this, "Course deleted successfully", Toast.LENGTH_SHORT).show();
-                    databaseChanged = true;
-                    loadCourses();
+                    showSuccessDeleteDialog();
                 } else {
-                    Toast.makeText(MainActivity.this, "Failed to delete course", Toast.LENGTH_SHORT).show();
+                    showAlertDialog("Error", "Failed to delete course");
                 }
             });
         }).start();
+    }
+    private void showAlertDialog(String title, String message) {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this)
+                .setTitle(title)
+                .setMessage(message)
+                .setIcon(R.drawable.ic_warning)
+                .setBackground(ContextCompat.getDrawable(this, R.drawable.alert_dialog_background))
+                .setPositiveButton("OK", (dialog, which) -> {
+                    dialog.dismiss();
+                });
+
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+        dialog.setOnShowListener(dialogInterface -> {
+            dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE)
+                    .setTextColor(ContextCompat.getColor(this, R.color.primary_color));
+        });
+
+        dialog.show();
+    }
+    private void showSuccessDeleteDialog() {
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_success);
+        
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, 
+                            WindowManager.LayoutParams.WRAP_CONTENT);
+            window.setBackgroundDrawable(ContextCompat.getDrawable(this, 
+                               R.drawable.alert_dialog_background));
+        }
+
+        ImageView imageViewSuccess = dialog.findViewById(R.id.imageView_success);
+        TextView textViewTitle = dialog.findViewById(R.id.textView_title);
+        TextView textViewMessage = dialog.findViewById(R.id.textView_message);
+        Button buttonOk = dialog.findViewById(R.id.button_ok);
+
+        textViewTitle.setText("Success");
+        textViewMessage.setText("Course deleted successfully");
+
+        Animation animation = AnimationUtils.loadAnimation(this, R.anim.success_animation);
+        imageViewSuccess.startAnimation(animation);
+
+        buttonOk.setOnClickListener(v -> {
+            dialog.dismiss();
+            // Nếu có type đang được chọn, load courses theo type đó
+            if (currentYogaType != null && !currentYogaType.isEmpty()) {
+                loadCoursesByType(currentYogaType);
+            } else {
+                loadCourses();
+            }
+        });
+
+        dialog.show();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if ((requestCode == CREATE_COURSE_REQUEST || requestCode == EDIT_COURSE_REQUEST) 
+        if ((requestCode == CREATE_COURSE_REQUEST || requestCode == EDIT_COURSE_REQUEST)
             && resultCode == RESULT_OK) {
             // Kiểm tra type hiện tại để load đúng danh sách
             if (currentYogaType != null && !currentYogaType.isEmpty()) {
@@ -229,6 +290,13 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         adapter.updateCourses(courses);
+                        if (courses.isEmpty()) {
+                            recyclerView.setVisibility(View.GONE);
+                            textViewNoCourses.setVisibility(View.VISIBLE);
+                        } else {
+                            recyclerView.setVisibility(View.VISIBLE);
+                            textViewNoCourses.setVisibility(View.GONE);
+                        }
                     }
                 });
             }
@@ -236,6 +304,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadCoursesByType(String type) {
+        if (type == null) {
+            loadCourses(); // Nếu type là null, load tất cả courses
+            return;
+        }
+        
         Log.d("MainActivity", "Loading courses for type: " + type);
         new Thread(new Runnable() {
             @Override
@@ -246,9 +319,11 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         adapter.updateCourses(courses);
                         if (courses.isEmpty()) {
-                            Toast.makeText(MainActivity.this, 
-                                "No courses found for " + type, 
-                                Toast.LENGTH_SHORT).show();
+                            recyclerView.setVisibility(View.GONE);
+                            textViewNoCourses.setVisibility(View.VISIBLE);
+                        } else {
+                            recyclerView.setVisibility(View.VISIBLE);
+                            textViewNoCourses.setVisibility(View.GONE);
                         }
                     }
                 });

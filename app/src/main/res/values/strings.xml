@@ -30,4 +30,7 @@
     <string name="dialog_title_class_error">Class Error</string>
     <string name="dialog_message_class_save_failed">Failed to save class</string>
     <string name="dialog_message_class_update_failed">Failed to update class</string>
+
+    <string name="dialog_title_success">Success</string>
+    <string name="dialog_message_course_saved">Course saved successfully</string>
 </resources>

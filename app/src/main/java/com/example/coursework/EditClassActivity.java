@@ -2,13 +2,20 @@ package com.example.coursework;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -125,18 +132,65 @@ public class EditClassActivity extends AppCompatActivity {
         String comments = editTextComments.getText().toString();
 
         new Thread(() -> {
-            Class updatedClass = db.classDao().getClassById(classId);
-            updatedClass.date = day;
-            updatedClass.teacher = teacher;
-            updatedClass.comments = comments;
+            try {
+                Class updatedClass = db.classDao().getClassById(classId);
+                if (updatedClass != null) {
+                    updatedClass.date = day;
+                    updatedClass.teacher = teacher;
+                    updatedClass.comments = comments;
 
-            db.classDao().update(updatedClass);
-
-            runOnUiThread(() -> {
-                Toast.makeText(EditClassActivity.this, "Class updated successfully", Toast.LENGTH_SHORT).show();
-                finish();
-            });
+                    int result = db.classDao().update(updatedClass);
+                    runOnUiThread(() -> {
+                        if (result > 0) {
+                            showSuccessDialog();
+                        } else {
+                            showAlertDialog("Lỗi", "Không thể cập nhật lớp học");
+                        }
+                    });
+                } else {
+                    runOnUiThread(() -> {
+                        showAlertDialog("Lỗi", "Không tìm thấy lớp học");
+                    });
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> {
+                    showAlertDialog("Lỗi", "Đã xảy ra lỗi khi cập nhật: " + e.getMessage());
+                });
+            }
         }).start();
+    }
+
+    private void showSuccessDialog() {
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_success);
+        
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setLayout(WindowManager.LayoutParams.MATCH_PARENT, 
+                            WindowManager.LayoutParams.WRAP_CONTENT);
+            window.setBackgroundDrawable(ContextCompat.getDrawable(this, 
+                               R.drawable.alert_dialog_background));
+        }
+
+        ImageView imageViewSuccess = dialog.findViewById(R.id.imageView_success);
+        TextView textViewTitle = dialog.findViewById(R.id.textView_title);
+        TextView textViewMessage = dialog.findViewById(R.id.textView_message);
+        Button buttonOk = dialog.findViewById(R.id.button_ok);
+
+        textViewTitle.setText("Thành công");
+        textViewMessage.setText("Đã cập nhật lớp học thành công");
+
+        Animation animation = AnimationUtils.loadAnimation(this, R.anim.success_animation);
+        imageViewSuccess.startAnimation(animation);
+
+        buttonOk.setOnClickListener(v -> {
+            dialog.dismiss();
+            finish();
+        });
+
+        dialog.show();
     }
 
     @Override
